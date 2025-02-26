@@ -19,6 +19,7 @@ const SectionList = ({section, items, onSave}) => {
         <div className="mb-6">
             <h2 className="text-xl font-semibold mb-2">{section}</h2>
             <ul className="mb-4">
+                {/* eslint-disable-next-line react/prop-types */}
                 {items.map((item, index) => (
                     <li key={index} className="ml-4">- {item}</li>
                 ))}
