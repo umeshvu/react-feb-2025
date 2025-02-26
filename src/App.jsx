@@ -1,95 +1,92 @@
-import  {useState} from 'react';
+import {useState} from 'react';
 import './App.css'
 
 // eslint-disable-next-line react/prop-types
-const DataList = ({data}) => {
-    const [editableData, setEditableData] = useState(data);
-    const [tempData, setTempData] = useState(data);
-    const [isEditing, setIsEditing] = useState(false);
-    const [isListing, setIsListing] = useState(false);
+const SectionList = ({section, items, onSave}) => {
 
-    const handleEditClick = () => {
-        setIsEditing(true);
-    };
+    const [showExtra, setShowExtra] = useState(false);
+    const [type, setType] = useState("");
+    const [reason, setReason] = useState("");
 
-    const handleSaveClick = () => {
-        setIsEditing(false);
-        setEditableData(tempData);
-        console.log('Saved data:', tempData);
-        // Here you can add logic to save the data to a server
-    };
-
-    const handleStartListingClick = () => {
-        setIsListing(!isListing);
-    };
-
-    const handleInputChange = (event, section, itemKey) => {
-        const newData = {...tempData};
-        newData[section][itemKey] = event.target.value;
-        setTempData(newData);
+    const handleSave = () => {
+        onSave(section, type, reason);
+        setType("");
+        setReason("");
+        setShowExtra(false);
     };
 
     return (
-        <div>
-            {isListing ? (
-                <div>
-                    {Object.keys(editableData).map((section, index) => (
-                        <div key={index}>
-                            <h2>{section}</h2>
-                            <ul>
-                                {Object.keys(editableData[section]).map((itemKey) => (
-                                    <li key={itemKey}>
-                                        {isEditing ? (
-                                            <input
-                                                type="text"
-                                                value={tempData[section][itemKey]}
-                                                onChange={(event) => handleInputChange(event, section, itemKey)}
-                                            />
-                                        ) : (
-                                            editableData[section][itemKey]
-                                        )}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-                    {isEditing ? (
-                        <button onClick={handleSaveClick}>Save</button>
-                    ) : (
-                        <button onClick={handleEditClick}>Edit</button>
-                    )}
+        <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-2">{section}</h2>
+            <ul className="mb-4">
+                {items.map((item, index) => (
+                    <li key={index} className="ml-4">- {item}</li>
+                ))}
+            </ul>
+            {showExtra ? (
+                <div className="space-y-2">
+                    <input
+                        type="text"
+                        placeholder="Type"
+                        value={type}
+                        onChange={(e) => setType(e.target.value)}
+                        className="border p-2 rounded"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Reason"
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        className="border p-2 rounded"
+                    />
+                    <button
+                        onClick={handleSave}
+                        className="bg-blue-500 text-white p-2 rounded"
+                    >
+                        Save Type and Reason
+                    </button>
                 </div>
-            ) : (<p>...</p>
+            ) : (
+                <button
+                    onClick={() => setShowExtra(true)}
+                    className="bg-green-500 text-white p-2 rounded"
+                >
+                    Add Extra
+                </button>
             )}
-            <button onClick={handleStartListingClick}>Start Listing</button>
         </div>
     );
 };
 
-const App = () => {
-    const data = {
-        one: {
-            "1": "this is one",
-            "2": "this is two",
-            "3": "this is three"
-        },
-        two: {
-            "1": "this is one",
-            "2": "this is two",
-            "3": "this is three"
-        },
-        three: {
-            "1": "this is one",
-            "2": "this is two",
-            "3": "this is three"
-        }
+const ParentComponent = () => {
+    const initialData = {
+        one: ["this is one1", "this is two1", "this is three1"],
+        two: ["this is one2", "this is two2", "this is three2"],
+        three: ["this is one3", "this is two3", "this is three3"],
+    };
+
+    const [data, setData] = useState(initialData);
+
+    const saveExtra = (section, type, reason) => {
+        setData((prevData) => ({
+            ...prevData,
+            [section]: [...prevData[section], `Type: ${type}, Reason: ${reason}`],
+        }));
     };
 
     return (
-        <div>
-            <DataList data={data}/>
+        <div className="p-4">
+            <h1 className="text-2xl font-bold mb-4">Section Editor</h1>
+            {Object.keys(data).map((key) => (
+                <SectionList
+                    key={key}
+                    section={key}
+                    items={data[key]}
+                    onSave={saveExtra}
+                />
+            ))}
         </div>
     );
 };
 
-export default App;
+export default ParentComponent;
